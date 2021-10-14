@@ -1,0 +1,113 @@
+const { register, load_config, load_s3_fetch_test } = require('../index');
+
+describe('register', () => {
+  test('reigsters load_s3_fetch on init_master and calls load_config', () => {
+    const registerHookMock = jest.fn(() => {});
+    const loadConfigMock = jest.fn(() => {});
+
+        class TestClass  {
+          constructor() {
+            this.register_hook = registerHookMock;
+            this.load_config = loadConfigMock;
+          }
+        };
+
+        testFunc = new TestClass();
+        testFunc.register = register;
+        testFunc.register();
+
+        expect(registerHookMock.mock.calls[0][0]).toEqual('init_master');
+        expect(registerHookMock.mock.calls[0][1]).toEqual('load_s3_fetch');
+        expect(registerHookMock.mock.calls[0][3]).toEqual(undefined);
+        expect(registerHookMock.mock.calls[1]).toEqual(undefined);
+
+        expect(loadConfigMock.mock.calls[0]).toEqual([]);
+        expect(loadConfigMock.mock.calls[1]).toEqual(undefined);
+  });
+});
+
+describe('load_config', () => {
+  test('success with all config values', () => {
+      const getConfigMock = jest.fn(() => ({
+        test: 'ing'
+      }));
+      const logWarningMock = jest.fn(() => {});
+
+      class TestClass  {
+        constructor() {
+          this.config = { get: getConfigMock };
+          this.logwarning = logWarningMock;
+        }
+      };
+
+      testFunc = new TestClass();
+      testFunc.load_config = load_config;
+      testFunc.load_config();
+
+      expect(getConfigMock.mock.calls[0][0]).toEqual('s3-fetch.json');
+      expect(testFunc.cfg.test).toEqual('ing');
+    });
+});
+
+describe('load_s3_fetch', () => {
+  test('load_s3_fetch success without cfg credentials', (testComplete) => {
+    const getObjectMock = jest.fn((params, cb) => {
+      cb(null, { Body: 'dater-potater' });
+    });
+
+    class S3Mock {
+      constructor() {
+        this.getObject = getObjectMock;
+      }
+    }
+
+    const awsMock = {
+      S3: S3Mock
+    }
+
+    const fsMock = {
+      writeFileSync: jest.fn(() => {})
+    }
+
+    const connection = {
+      loginfo: jest.fn(msg => {
+        // console.log(msg);
+      }),
+      logdebug: jest.fn(msg => {
+        // console.log(msg);
+      })
+    };
+
+    const next = () => {
+      expect(getObjectMock.mock.calls[0][0]).toEqual(
+        { Bucket: 'bucket1', Key: 'key1' }
+      );
+      expect(getObjectMock.mock.calls[1][0]).toEqual(
+        { Bucket: 'bucket2', Key: 'key2' }
+      );
+      expect(getObjectMock.mock.calls[2]).toEqual(undefined);
+
+      expect(fsMock.writeFileSync.mock.calls[0][0]).toEqual('path1');
+      expect(fsMock.writeFileSync.mock.calls[0][1]).toEqual('dater-potater');
+      expect(fsMock.writeFileSync.mock.calls[1][0]).toEqual('path2');
+      expect(fsMock.writeFileSync.mock.calls[1][1]).toEqual('dater-potater');
+
+      testComplete();
+    };
+
+    class HarakaMock  {
+      constructor() {
+        this.cfg = {
+          files: [
+            { bucket: 'bucket1', key: 'key1', path: 'path1' },
+            { bucket: 'bucket2', key: 'key2', path: 'path2' }]
+        };
+      };
+    };
+
+    testFunc = new HarakaMock();
+    testFunc.load_s3_fetch = load_s3_fetch_test(awsMock, fsMock);
+
+    testFunc.load_s3_fetch(next, connection);
+  });
+});

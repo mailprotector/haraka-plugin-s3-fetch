@@ -1,11 +1,17 @@
 {
-  "name": "haraka-plugin-s3-fetch",
+  "name": "@mailprotector/haraka-plugin-s3-fetch",
   "version": "1.0.0",
   "description": "Haraka plugin that fetches certificates from s3",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mailprotector/haraka-plugin-s3-fetch.git"
+  },
+  "scripts": {
+    "lint": "npx eslint *.js test/*.js",
+    "lintfix": "npx eslint --fix *.js test/*.js",
+    "versions": "npx dependency-version-checker check",
+    "test": "jest ./test --detectOpenHandles"
   },
   "keywords": [
     "haraka",
@@ -23,5 +29,10 @@
   "dependencies": {
     "aws-sdk": "^2.1008.0",
     "openssl-nodejs": "^1.0.5"
+  },
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-plugin-haraka": "*",
+    "jest": "*"
   }
 }
