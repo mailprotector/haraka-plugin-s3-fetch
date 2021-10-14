@@ -1,0 +1,27 @@
+{
+  "name": "haraka-plugin-s3-fetch",
+  "version": "1.0.0",
+  "description": "Haraka plugin that fetches certificates from s3",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mailprotector/haraka-plugin-s3-fetch.git"
+  },
+  "keywords": [
+    "haraka",
+    "plugin",
+    "certificate",
+    "aws",
+    "acm"
+  ],
+  "author": "npm@mailprotector.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mailprotector/haraka-plugin-s3-fetch/issues"
+  },
+  "homepage": "https://github.com/mailprotector/haraka-plugin-s3-fetch#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1008.0",
+    "openssl-nodejs": "^1.0.5"
+  }
+}
