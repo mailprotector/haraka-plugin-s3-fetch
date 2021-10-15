@@ -6,7 +6,7 @@ Install with npm
 
 `npm install @mailprotector/haraka-plugin-s3-fetch --save`
 
-### Configuration
+## CONFIG
 ### Files
 Add s3-fetch.json in the config folder with the following settings for each file you'd like to load:
 ```
