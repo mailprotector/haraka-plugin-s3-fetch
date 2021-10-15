@@ -1,39 +1,41 @@
 # haraka-plugin-s3-fetch
 A Haraka plugin to fetch config files from an S3 bucket.
 
-## INSTALL
+## Install
 Install with npm
 
 `npm install @mailprotector/haraka-plugin-s3-fetch --save`
 
-## CONFIG
-### Files
-Add s3-fetch.json in the config folder with the following settings for each file you'd like to load:
-```
-{
-    "files": [
-        {
-            "bucket": "haraka-config-bucket",
-            "key": "tls.ini",
-            "path": "/etc/haraka/config/tls.ini"
-        },
-        ...
-    ]
-}
-```
+## Setup
 
-### AWS Credentials
+### Enable Plugin
+Add to `plugin` file in the haraka config folder
+```text
+@mailprotector/haraka-plugin-s3-fetch
+```
+### Config
+
+Config options are set in `s3-fetch.json`:
+
+**Files**
+
+| Parameter | Description                            | Type   | Default Value |
+| --------- | -------------------------------------- | ------ | ------------- |
+| bucket    | s3 bucket name where file is located   | string | none          |
+| key       | s3 key of file                         | string | none          |
+| path      | local output path to store the file in | string | none          |
+
+**Credentials**
+
 There are a few options when it comes to setting AWS credentials. Optionally, you can add a `credentials` directive to the config file pass in specfic AWS credentials or STS session tokens.
 Refer to the [AWS documentation](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html) for more details on passing credentials
 
-```
-    "credentials": {
-        "accessKeyId": "my-access-key-id",
-        "secretAccessKey": "my-secret-access-key",
-        "sessionToken": "my-session-token", (optional)
-        "region": "us-east-1"
-    }
-```
+| Parameter       | Description           | Type   | Default Value |
+| --------------- | --------------------- | ------ | ------------- |
+| accessKeyId     | AWS API key ID        | string | none          |
+| secretAccessKey | AWS secret access key | string | none          |
+| sessionToken    | STS assume role token | string | none          |
+| region          | AWS region            | string | none          |
 
 ##
 
