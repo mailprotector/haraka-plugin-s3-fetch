@@ -7,7 +7,7 @@ exports.register = function () {
 
 exports.load_config = function () {
   let cfg = this.config;
-    const retryCount = 0;
+    let retryCount = 0;
     const retryLimit = 2;
 
     const attemptLoadConfig = () => {
