@@ -55,9 +55,7 @@ describe('load_s3_fetch', () => {
       }
     }
 
-    const awsMock = {
-      S3: S3Mock
-    }
+    const awsMock = { S3: S3Mock };
 
     const fsMock = {
       writeFileSync: jest.fn(() => {})
