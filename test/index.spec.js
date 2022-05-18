@@ -2,27 +2,21 @@ const { register, load_config, load_s3_fetch_test } = require('../index');
 
 describe('register', () => {
   test('reigsters load_s3_fetch on init_master and calls load_config', () => {
-    const registerHookMock = jest.fn(() => {});
     const loadConfigMock = jest.fn(() => {});
+    const loadS3FetchMock = jest.fn(() => {});
+    class TestClass  {
+      constructor() {
+        this.load_config = loadConfigMock;
+        this.load_s3_fetch = loadS3FetchMock;
+      }
+    };
 
-        class TestClass  {
-          constructor() {
-            this.register_hook = registerHookMock;
-            this.load_config = loadConfigMock;
-          }
-        };
+    testFunc = new TestClass();
+    testFunc.register = register;
+    testFunc.register();
 
-        testFunc = new TestClass();
-        testFunc.register = register;
-        testFunc.register();
-
-        expect(registerHookMock.mock.calls[0][0]).toEqual('init_master');
-        expect(registerHookMock.mock.calls[0][1]).toEqual('load_s3_fetch');
-        expect(registerHookMock.mock.calls[0][3]).toEqual(undefined);
-        expect(registerHookMock.mock.calls[1]).toEqual(undefined);
-
-        expect(loadConfigMock.mock.calls[0]).toEqual([]);
-        expect(loadConfigMock.mock.calls[1]).toEqual(undefined);
+    expect(loadConfigMock.mock.calls[0]).toEqual([]);
+    expect(loadS3FetchMock.mock.calls[0]).toEqual([]);
   });
 });
 

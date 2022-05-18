@@ -1,8 +1,8 @@
 'use strict';
 
 exports.register = function () {
-  this.register_hook('init_master', 'load_s3_fetch')
-  this.load_config()
+  this.load_config();
+  this.load_s3_fetch();
 }
 
 exports.load_config = function () {
