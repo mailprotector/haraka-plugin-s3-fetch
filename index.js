@@ -2,48 +2,54 @@
 
 exports.register = function () {
   this.load_config();
-  this.load_s3_fetch();
+  this.load_s3_fetch(require('aws-sdk'), require('fs'));
 }
 
 exports.load_config = function () {
   this.cfg = this.config.get('s3-fetch.json', this.load_config);
 }
 
-const buildLoadS3Fetch = (AWS, fs) => {
-  return function (next, connection) {
-    const plugin = this
+function loadPluginFile(s3, file, plugin, fs) {
+  return new Promise(function (resolve, reject) {
+    try {
+      const params = {
+        Bucket: file.bucket,
+        Key: file.key
+      };
 
-    if (plugin.cfg.credentials) {
-      AWS.config.update(plugin.cfg.credentials)
+      plugin.logdebug(params);
+
+      s3.getObject(params, (err, data) => {
+        if (err) {
+          plugin.logerror(err, err.stack)
+          reject(false);
+        } else {
+          fs.writeFileSync(file.path, data.Body)
+          plugin.loginfo(`s3-fetch: file successfully written to ${file.path}`);
+          resolve(true);
+        }
+      });
+    } catch (err) {
+      reject(err);
     }
+  });
+}
 
-    var s3 = new AWS.S3();
+const buildS3Loader = (done) => async function loadS3PluginFiles(AWS, fs) {
+  const plugin = this;
+  var s3 = new AWS.S3();
 
-    let filesComplete = 0;
-    plugin.cfg.files.forEach(file => {
-        var params = {
-          Bucket: file.bucket,
-          Key: file.key
-        };
-
-        connection.logdebug(params);
-        s3.getObject(params, function (err, data) {
-          if (err) {
-            connection.logerror(err, err.stack)
-          }
-          else {
-            fs.writeFileSync(file.path, data.Body)
-            connection.loginfo(`s3-fetch: file successfully written to ${file.path}`);
-          }
-          filesComplete += 1;
-          if (filesComplete >= plugin.cfg.files.length) {
-            next();
-          }
-        })
-    })
+  if (plugin.cfg.credentials) {
+    AWS.config.update(plugin.cfg.credentials)
   }
-};
 
-exports.load_s3_fetch_test = buildLoadS3Fetch;
+  for(var i = 0; i < plugin.cfg.files.length; i++) {
+    let results = await loadPluginFile(s3, plugin.cfg.files[i], plugin, fs);
+    plugin.loginfo(results)
+  }
 
-exports.load_s3_fetch = buildLoadS3Fetch(require('aws-sdk'), require('fs'))
+  done();
+}
+
+exports.load_s3_fetch_test = buildS3Loader;
+exports.load_s3_fetch = buildS3Loader(()=>{});
