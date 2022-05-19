@@ -6,24 +6,7 @@ exports.register = function () {
 }
 
 exports.load_config = function () {
-  let cfg = this.config;
-    let retryCount = 0;
-    const retryLimit = 2;
-
-    const attemptLoadConfig = () => {
-      retryCount += 1;
-      if (retryCount >= retryLimit) {
-        return;
-      }
-      
-      try {
-        this.cfg = this.config.get('s3-fetch.json', this.load_config);
-      } catch (err) {
-        setTimeout(attemptLoadConfig, 5000);
-      }
-    };
-
-  attemptLoadConfig();
+  this.cfg = this.config.get('s3-fetch.json', this.load_config);
 }
 
 const buildLoadS3Fetch = (AWS, fs) => {
