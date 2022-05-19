@@ -72,7 +72,8 @@ describe('load_s3_fetch', () => {
         this.cfg = {
           files: [
             { bucket: 'bucket1', key: 'key1', path: 'path1' },
-            { bucket: 'bucket2', key: 'key2', path: 'path2' }]
+            { bucket: 'bucket2', key: 'key2', path: 'path2' }
+          ]
         };
       };
     };
