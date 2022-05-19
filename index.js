@@ -22,7 +22,7 @@ function loadPluginFile(s3, file, plugin, fs) {
       s3.getObject(params, (err, data) => {
         if (err) {
           plugin.logerror(err, err.stack)
-          reject(false);
+          resolve(false);
         } else {
           fs.writeFileSync(file.path, data.Body)
           plugin.loginfo(`s3-fetch: file successfully written to ${file.path}`);
@@ -37,14 +37,13 @@ function loadPluginFile(s3, file, plugin, fs) {
 
 const buildS3Loader = (done) => async function loadS3PluginFiles(AWS, fs) {
   const plugin = this;
+  if (plugin.cfg.credentials) { AWS.config.update(plugin.cfg.credentials) }
+
   var s3 = new AWS.S3();
 
-  if (plugin.cfg.credentials) {
-    AWS.config.update(plugin.cfg.credentials)
-  }
-
   for(var i = 0; i < plugin.cfg.files.length; i++) {
-    let results = await loadPluginFile(s3, plugin.cfg.files[i], plugin, fs);
+    const file = plugin.cfg.files[i];
+    await loadPluginFile(s3, file, plugin, fs);
   }
 
   done();
