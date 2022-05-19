@@ -17,7 +17,7 @@ function loadPluginFile(s3, file, plugin, fs) {
         Key: file.key
       };
 
-      plugin.logdebug(params);
+      plugin.loginfo(params);
 
       s3.getObject(params, (err, data) => {
         if (err) {
@@ -45,7 +45,6 @@ const buildS3Loader = (done) => async function loadS3PluginFiles(AWS, fs) {
 
   for(var i = 0; i < plugin.cfg.files.length; i++) {
     let results = await loadPluginFile(s3, plugin.cfg.files[i], plugin, fs);
-    plugin.loginfo(results)
   }
 
   done();
