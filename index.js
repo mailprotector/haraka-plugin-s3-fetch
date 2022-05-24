@@ -2,11 +2,28 @@
 
 exports.register = function () {
   this.load_config();
-  this.load_s3_fetch(require('aws-sdk'), require('fs'));
+  this.register_hook('init_master', 'load_s3_fetch', -50);
 }
 
 exports.load_config = function () {
-  this.cfg = this.config.get('s3-fetch.json', this.load_config);
+  try {
+    this.cfg = this.config.get('s3-fetch.json', this.load_config);
+  } catch (err) {
+    this.cfg = {
+      credentials: {
+        accessKeyId: process.env.ACCESS_KEY_ID,
+        secretAccessKey: process.env.SECRET_ACCESS_KEY,
+        region: process.env.REGION
+      },
+      files: [
+        {
+          bucket: process.env.BUCKET,
+          key: process.env.KEY,
+          path: process.env.PATH
+        }
+      ]
+    };
+  }
 }
 
 function loadPluginFile(s3, file, plugin, fs) {
@@ -17,7 +34,7 @@ function loadPluginFile(s3, file, plugin, fs) {
         Key: file.key
       };
 
-      plugin.loginfo(params);
+      plugin.loginfo(params)
 
       s3.getObject(params, (err, data) => {
         if (err) {
@@ -35,19 +52,39 @@ function loadPluginFile(s3, file, plugin, fs) {
   });
 }
 
-const buildS3Loader = (done) => async function loadS3PluginFiles(AWS, fs) {
-  const plugin = this;
-  if (plugin.cfg.credentials) { AWS.config.update(plugin.cfg.credentials) }
+const buildS3Loader = (done) => function (AWS, fs) {
+  return async function (next) {
+    const plugin = this;
+    if (plugin.cfg.credentials) { AWS.config.update(plugin.cfg.credentials) }
 
-  var s3 = new AWS.S3();
+    var s3 = new AWS.S3();
 
-  for(var i = 0; i < plugin.cfg.files.length; i++) {
-    const file = plugin.cfg.files[i];
-    await loadPluginFile(s3, file, plugin, fs);
+    for (var i = 0; i < plugin.cfg.files.length; i++) {
+      const file = plugin.cfg.files[i];
+      await loadPluginFile(s3, file, plugin, fs);
+    }
+
+    done();
+    next();
   }
-
-  done();
 }
 
+
+const buildPluginFunction = (AWS, fs) => {
+  return async function (done) {
+    const plugin = this;
+    if (plugin.cfg.credentials) { AWS.config.update(plugin.cfg.credentials) }
+
+    var s3 = new AWS.S3();
+
+    for (var i = 0; i < plugin.cfg.files.length; i++) {
+      const file = plugin.cfg.files[i];
+      await loadPluginFile(s3, file, plugin, fs);
+    }
+
+    done();
+  }
+};
+
 exports.load_s3_fetch_test = buildS3Loader;
-exports.load_s3_fetch = buildS3Loader(()=>{});
+exports.load_s3_fetch = buildPluginFunction(require('aws-sdk'), require('fs'));
